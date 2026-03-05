@@ -1,0 +1,11 @@
+﻿
+C:\Proyectos\moni-up-bursatil\src\services\storage.service.js
+  15:14  error    'btoa' is not defined              no-undef
+  16:14  warning  'e' is defined but never used      no-unused-vars
+  26:33  error    'atob' is not defined              no-undef
+  27:14  warning  'e' is defined but never used      no-unused-vars
+  75:14  warning  'error' is defined but never used  no-unused-vars
+  87:14  warning  'error' is defined but never used  no-unused-vars
+
+Ô£û 6 problems (2 errors, 4 warnings)
+

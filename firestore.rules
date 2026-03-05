@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Funciones de ayuda
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Reglas para la colección de perfiles de usuario
+    match /users/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      
+      // Validación estricta de esquema para escritura (Previene inyección masiva de campos)
+      allow write: if isAuthenticated() && isOwner(userId)
+                    && request.resource.data.keys().hasAll(['email']) 
+                    && request.resource.data.keys().hasOnly(['email', 'displayName', 'createdAt', 'lastLogin', 'preferences'])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() <= 100
+                    && (
+                      !('displayName' in request.resource.data) || 
+                      (request.resource.data.displayName is string && request.resource.data.displayName.size() <= 60)
+                    );
+    }
+    
+    // Reglas para el portafolio (si se guardara en Firestore en el futuro)
+    match /portfolios/{userId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Por defecto, denegar todo lo demás
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

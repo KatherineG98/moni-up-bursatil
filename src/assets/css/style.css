@@ -1,0 +1,17 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #a855f7; /* Purple 500 */
+  --color-secondary: #ec4899; /* Pink 500 */
+  --font-sans: 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark;
+}
+
+:root {
+  scroll-behavior: smooth;
+}
