@@ -14,7 +14,7 @@ const pinnedCoins = computed(() => {
 </script>
 
 <template>
-  <AppCard title="Criptomonedas Destacadas" bordered class="flex flex-col h-full">
+  <AppCard title="Criptomonedas Destacadas" bordered shadow="shadow-sm" class="flex flex-col h-full">
     <!-- Estado de Carga -->
     <div
       v-if="cryptoStore.loading && cryptoStore.cryptos.length === 0"

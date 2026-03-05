@@ -32,6 +32,27 @@ service cloud.firestore {
       allow read, write: if isAuthenticated() && isOwner(userId);
     }
 
+    // Reglas para el historial de noticias vistas
+    match /users/{userId}/newsHistory/{newsId} {
+      allow read, write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Reglas para comentarios en noticias
+    match /news/{newsId}/comments/{commentId} {
+      // Todos pueden leer para evitar errores de parpadeo al recargar la página
+      allow read: if true;
+      allow create: if isAuthenticated() 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() > 0 
+                    && request.resource.data.text.size() <= 300;
+      
+      // Solo el autor o un admin podría borrar, por ahora solo el autor
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // No permitimos editar por simplicidad, o lo podemos añadir luego
+      allow update: if false;
+    }
+
     // Por defecto, denegar todo lo demás
     match /{document=**} {
       allow read, write: if false;

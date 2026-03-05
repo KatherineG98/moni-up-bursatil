@@ -57,7 +57,7 @@ const totalPerformance = computed(() => {
         </div>
       </AppCard>
 
-      <AppCard>
+      <AppCard shadow="shadow-sm">
         <div class="flex items-center gap-4">
           <div class="p-3 bg-secondary/10 text-secondary rounded-xl">
             <IconTrendingUp class="w-8 h-8" />
@@ -69,7 +69,7 @@ const totalPerformance = computed(() => {
         </div>
       </AppCard>
 
-      <AppCard>
+      <AppCard shadow="shadow-sm">
         <div class="flex items-center gap-4">
           <div class="p-3 bg-accent/10 text-accent rounded-xl">
             <IconActivity class="w-8 h-8" />

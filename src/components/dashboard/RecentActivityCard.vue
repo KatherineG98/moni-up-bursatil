@@ -8,7 +8,7 @@ const portfolioStore = usePortfolioStore()
 </script>
 
 <template>
-  <AppCard title="Actividad Reciente" bordered class="flex flex-col h-full">
+  <AppCard title="Actividad Reciente" bordered shadow="shadow-sm" class="flex flex-col h-full">
     <div
       v-if="portfolioStore.history.length === 0"
       class="flex flex-col items-center justify-center flex-1 min-h-48 text-center"

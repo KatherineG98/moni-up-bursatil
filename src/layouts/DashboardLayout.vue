@@ -14,6 +14,7 @@ import {
   IconLayoutSidebarLeftExpand,
   IconChartBarPopular,
   IconUserCircle,
+  IconNews,
 } from '@tabler/icons-vue'
 import { ref, onMounted } from 'vue'
 
@@ -128,6 +129,17 @@ onMounted(() => {
         >
           <IconCurrencyBitcoin class="w-5 h-5 shrink-0" />
           <span v-if="!isCollapsed">Mercado Cripto</span>
+        </router-link>
+
+        <router-link
+          :to="{ name: 'news' }"
+          class="flex items-center gap-3 px-4 py-3 rounded-lg text-base-content/80 hover:bg-base-200 hover:text-primary transition-colors font-medium whitespace-nowrap"
+          active-class="bg-primary/10 text-primary font-bold shadow-sm"
+          :class="{ 'justify-center px-0': isCollapsed }"
+          :title="isCollapsed ? 'Noticias' : ''"
+        >
+          <IconNews class="w-5 h-5 shrink-0" />
+          <span v-if="!isCollapsed">Noticias</span>
         </router-link>
       </nav>
 

@@ -105,7 +105,8 @@ const handleSell = (stock) => {
         <AppCard
           v-for="stock in marketStore.stocks"
           :key="stock.simbolo"
-          class="hover:border-primary transition-colors"
+          shadow="shadow-sm hover:shadow-md"
+          class="hover:border-primary transition-all duration-300"
         >
           <div class="flex justify-between items-start mb-4">
             <div>

@@ -64,6 +64,18 @@ const router = createRouter({
           meta: { title: 'Mercado Cripto' },
         },
         {
+          path: 'news',
+          name: 'news',
+          component: () => import('../views/dashboard/NewsPage.vue'),
+          meta: { title: 'Noticias' },
+        },
+        {
+          path: 'news/:id',
+          name: 'news-detail',
+          component: () => import('../views/dashboard/NewsDetail.vue'),
+          meta: { title: 'Detalle de Noticia' },
+        },
+        {
           path: 'settings',
           name: 'settings',
           component: () => import('../views/dashboard/UserConfiguration.vue'),
