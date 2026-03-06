@@ -25,7 +25,7 @@ const CORS_PROXY = 'https://api.allorigins.win/raw?url='
  * en el bloque `catch` si el servicio original bloquea la IP por estrangulamiento de tasa (Rate Limiting).
  */
 export const obtenerAccionesReales = async () => {
-  console.log('📡 Obteniendo datos reales de Yahoo Finance...')
+
 
   try {
     const promises = SYMBOLS.map(async (symbol) => {
@@ -80,7 +80,7 @@ export const obtenerAccionesReales = async () => {
     })
 
     const resultados = await Promise.all(promises)
-    console.log('✅ Datos reales obtenidos:', resultados.length)
+
 
     return resultados
   } catch (error) {

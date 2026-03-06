@@ -51,12 +51,12 @@ if (import.meta.env.VITE_FIREBASE_MEASUREMENT_ID) {
       isSupported().then((yes) => {
         if (yes) {
           analytics = getAnalytics(app)
-          console.log('📊 Analytics inicializado')
+
         }
       })
     })
-    .catch((err) => {
-      console.log('Analytics no disponible:', err.message)
+    .catch(() => {
+
     })
 }
 

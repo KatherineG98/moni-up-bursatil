@@ -30,7 +30,6 @@ export const useMarketStore = defineStore('market', () => {
    */
   const fetchMarketData = async (force = false) => {
     if (!force && stocks.value.length > 0) {
-      console.log('📦 Solicitud interceptada: Empleando caché en memoria (market)')
       return
     }
 
@@ -38,7 +37,6 @@ export const useMarketStore = defineStore('market', () => {
     error.value = null
 
     try {
-      console.log('🌐 Fetching datos de mercado de la API...')
       const newStocks = await obtenerAccionesReales()
 
       if (newStocks && newStocks.length > 0) {
