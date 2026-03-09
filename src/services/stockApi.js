@@ -16,8 +16,29 @@ export const SYMBOLS = [
   'WMT',
 ]
 
-// Nodo Proxy Público empleado como intermediario para adjuntar cabeceras CORS permisivas
-const CORS_PROXY = 'https://api.allorigins.win/raw?url='
+// Cadena de proxies CORS con fallback automático
+const CORS_PROXIES = [
+  (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+]
+
+/**
+ * Intenta obtener datos vía múltiples proxies CORS.
+ * Retorna la respuesta del primer proxy que responda correctamente.
+ */
+const fetchConProxy = async (url) => {
+  for (const buildProxy of CORS_PROXIES) {
+    try {
+      const proxyUrl = buildProxy(url)
+      const response = await fetch(proxyUrl)
+      if (response.ok) return response
+    } catch {
+      // Intentar siguiente proxy
+    }
+  }
+  throw new Error('Todos los proxies CORS fallaron')
+}
 
 /**
  * Mapea la constante global `SYMBOLS` generando un arreglo de promesas.
@@ -25,22 +46,13 @@ const CORS_PROXY = 'https://api.allorigins.win/raw?url='
  * en el bloque `catch` si el servicio original bloquea la IP por estrangulamiento de tasa (Rate Limiting).
  */
 export const obtenerAccionesReales = async () => {
-
-
   try {
     const promises = SYMBOLS.map(async (symbol) => {
       try {
         // Construir URL de Yahoo Finance
         const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d`
-        // Usar proxy para evitar CORS
-        const proxyUrl = `${CORS_PROXY}${encodeURIComponent(yahooUrl)}`
 
-        const response = await fetch(proxyUrl)
-
-        if (!response.ok) {
-          throw new Error(`Error HTTP ${response.status}`)
-        }
-
+        const response = await fetchConProxy(yahooUrl)
         const data = await response.json()
 
         // Extraer datos
@@ -80,7 +92,6 @@ export const obtenerAccionesReales = async () => {
     })
 
     const resultados = await Promise.all(promises)
-
 
     return resultados
   } catch (error) {

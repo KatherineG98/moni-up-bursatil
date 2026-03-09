@@ -1,12 +1,12 @@
 # 📈 MoniUp - Simulador Bursátil
 
-Plataforma educativa para la simulación de inversiones financieras. El sistema integra datos en tiempo real mediante proxy CORS hacia Yahoo Finance, la API de CoinGecko y la API de Finnhub, permitiendo a los usuarios practicar la gestión de un portafolio de activos sin riesgo real.
+Plataforma educativa para la simulación de inversiones financieras. El sistema integra datos en tiempo real mediante una cadena de proxies CORS con fallback automático hacia Yahoo Finance, la API de CoinGecko y la API de Finnhub, permitiendo a los usuarios practicar la gestión de un portafolio de activos sin riesgo real.
 
 ## Características
 
 - **Simulación de Mercado**: Compra y venta de activos con un saldo virtual inicial de $10,000 USD.
-- **Cotizaciones en Tiempo Real**: Consumo de APIs externas para obtener precios actualizados de acciones y criptomonedas.
-- **Noticias Financieras**: Consulta de noticias del mercado general y por empresa mediante la API de Finnhub. Incluye paginación, filtros por categoría y estado de lectura, e historial de noticias visitadas almacenado en Firestore.
+- **Cotizaciones en Tiempo Real**: Consumo de APIs externas para obtener precios actualizados de acciones y criptomonedas. El servicio de acciones utiliza una cadena de tres proxies CORS (`corsproxy.io`, `allorigins.win`, `codetabs.com`) con fallback automático: si un proxy falla, se intenta el siguiente. Si todos fallan, se utilizan datos de respaldo predefinidos.
+- **Noticias Financieras**: Consulta de noticias del mercado general y por empresa mediante la API de Finnhub. Incluye paginación, filtros por categoría y estado de lectura, ordenamiento por fecha (más recientes o más antiguas), e historial de noticias visitadas almacenado en Firestore. Las imágenes de logo de fuente (Reuters, Yahoo, etc.) se detectan automáticamente y se reemplazan por placeholders con gradientes visuales diferenciados por fuente.
 - **Traducción de Artículos**: Traducción bajo demanda de titulares y resúmenes de noticias del inglés al español utilizando la API de MyMemory.
 - **Comentarios en Noticias**: Sistema de comentarios por artículo con escritura y lectura en tiempo real sobre Firebase Firestore. Las reglas del servidor validan la identidad del autor y limitan la longitud del texto a 300 caracteres.
 - **Notificaciones de UI**: Retroalimentación visual de acciones y errores mediante `SweetAlert2` en lugar de alertas nativas del navegador.
@@ -81,18 +81,18 @@ El archivo `.env.example` contiene la plantilla de todas las variables requerida
 
 ## APIs Utilizadas
 
-| API                        | Uso en el proyecto                                         | Requiere API Key | Documentación                                                           |
-| -------------------------- | ---------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------- |
-| Yahoo Finance (proxy CORS) | Cotización de acciones en tiempo real.                     | No               | —                                                                       |
-| CoinGecko                  | Cotización de criptomonedas en tiempo real.                | No               | [docs.coingecko.com](https://docs.coingecko.com/)                       |
-| Finnhub                    | Noticias financieras del mercado general y por empresa.    | Sí               | [finnhub.io/docs](https://finnhub.io/docs/api)                          |
-| MyMemory                   | Traducción de titulares y resúmenes de noticias (EN → ES). | No               | [mymemory.translated.net](https://mymemory.translated.net/doc/spec.php) |
+| API                        | Uso en el proyecto                                                        | Requiere API Key | Documentación                                                           |
+| -------------------------- | ------------------------------------------------------------------------- | ---------------- | ----------------------------------------------------------------------- |
+| Yahoo Finance (proxy CORS) | Cotización de acciones en tiempo real (cadena de fallback con 3 proxies). | No               | —                                                                       |
+| CoinGecko                  | Cotización de criptomonedas en tiempo real.                               | No               | [docs.coingecko.com](https://docs.coingecko.com/)                       |
+| Finnhub                    | Noticias financieras del mercado general y por empresa.                   | Sí               | [finnhub.io/docs](https://finnhub.io/docs/api)                          |
+| MyMemory                   | Traducción de titulares y resúmenes de noticias (EN → ES).                | No               | [mymemory.translated.net](https://mymemory.translated.net/doc/spec.php) |
 
 ## Seguridad
 
 El proyecto implementa las siguientes medidas de protección:
 
-- **Sanitización de entrada (XSS)**: Todo texto renderizado dinámicamente pasa por `DOMPurify` mediante la directiva global `v-sanitize`. No se utiliza `v-html` en ningún componente.
+- **Sanitización de entrada (XSS)**: Todo texto renderizado dinámicamente pasa por `DOMPurify` (versión `>=3.2.4`, sin vulnerabilidades conocidas) mediante la directiva global `v-sanitize`. No se utiliza `v-html` en ningún componente.
 - **Sanitización de datos de API**: Los resúmenes de noticias provenientes de Finnhub se procesan con una función de limpieza de HTML en dos pasos (decodificación de entidades + extracción de texto plano) antes de almacenarse en el estado.
 - **Validación del lado del servidor (Firestore Rules)**: Las reglas de seguridad validan el esquema de datos (`hasOnly`, `is string`, `size()`), restringen la escritura al propietario de la sesión (`request.auth.uid`) y deniegan toda operación no autorizada por defecto.
 - **Validación del lado del cliente**: Los formularios de registro y login validan formato de email (Regex), longitud mínima de contraseña (8 caracteres) y aplican `maxlength` en todos los campos de entrada.

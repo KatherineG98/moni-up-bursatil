@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { IconClock } from '@tabler/icons-vue'
+import { IconClock, IconNews } from '@tabler/icons-vue'
 
 const props = defineProps({
   news: {
@@ -25,16 +25,36 @@ const formattedDate = computed(() => {
   }).format(date)
 })
 
-const defaultImage = 'https://placehold.co/600x400/1d232a/a6adbb?text=Finanzas'
-const imageUrl = computed(() => props.news.image || defaultImage)
+const hasImage = computed(() => !!props.news.image)
 const badgeText = computed(() => props.isRead ? 'Leída' : 'Nueva')
 const badgeClass = computed(() => props.isRead ? 'badge-neutral' : 'badge-primary')
+
+// Gradiente personalizado por fuente para placeholders sin imagen
+const placeholderGradient = computed(() => {
+  const source = (props.news.source || '').toLowerCase()
+  const gradients = {
+    reuters: 'from-orange-600 to-orange-900',
+    yahoo: 'from-purple-600 to-indigo-900',
+    cnbc: 'from-blue-600 to-blue-900',
+    bloomberg: 'from-slate-700 to-slate-900',
+    default: 'from-primary/80 to-base-content/60',
+  }
+  return gradients[source] || gradients.default
+})
 </script>
 
 <template>
   <div class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow h-full border border-base-300 overflow-hidden cursor-pointer">
     <figure class="h-48 relative overflow-hidden">
-      <img :src="imageUrl" :alt="news.headline" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+      <!-- Imagen real del artículo -->
+      <img v-if="hasImage" :src="news.image" :alt="news.headline" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+
+      <!-- Placeholder estilizado cuando no hay imagen -->
+      <div v-else :class="['w-full h-full flex flex-col items-center justify-center bg-linear-to-br text-white/90', placeholderGradient]">
+        <IconNews class="w-10 h-10 mb-2 opacity-60" />
+        <span class="text-xs font-bold uppercase tracking-widest opacity-80">{{ news.source }}</span>
+      </div>
+
       <div class="absolute top-2 right-2 flex gap-2">
         <span class="badge badge-sm" :class="badgeClass">{{ badgeText }}</span>
         <span v-if="news.customType === 'company'" class="badge badge-sm badge-info">Empresa</span>

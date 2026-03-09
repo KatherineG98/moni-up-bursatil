@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useNewsStore } from '@/stores/news'
 import NewsCard from '@/components/news/NewsCard.vue'
 import MarketSyncBadge from '@/components/common/MarketSyncBadge.vue'
-import { IconNews, IconHistory } from '@tabler/icons-vue'
+import { IconNews, IconHistory, IconSortDescending, IconSortAscending } from '@tabler/icons-vue'
 import { showToast } from '@/utils/sweetalert'
 
 const newsStore = useNewsStore()
@@ -32,6 +32,11 @@ const changePage = (page) => {
 const handleFilterChange = (filter) => {
   newsStore.filterType = filter
   currentPage.value = 1 // Reinicio de paginación al filtrar
+}
+
+const handleSortToggle = () => {
+  newsStore.sortOrder = newsStore.sortOrder === 'desc' ? 'asc' : 'desc'
+  currentPage.value = 1
 }
 
 const refreshNews = async () => {
@@ -82,13 +87,25 @@ onMounted(() => {
         />
       </div>
 
-      <!-- Filtros -->
-      <div class="tabs tabs-boxed mb-6 overflow-x-auto whitespace-nowrap bg-base-100/50 p-2 shadow-sm rounded-xl">
+      <!-- Filtros y Orden -->
+      <div class="tabs tabs-boxed mb-6 overflow-x-auto whitespace-nowrap bg-base-100/50 p-2 shadow-sm rounded-xl flex items-center gap-2">
         <a class="tab" :class="{ 'tab-active font-bold text-primary': newsStore.filterType === 'all' }" @click="handleFilterChange('all')">Todas</a>
         <a class="tab" :class="{ 'tab-active font-bold text-primary': newsStore.filterType === 'market' }" @click="handleFilterChange('market')">Mercado</a>
         <a class="tab" :class="{ 'tab-active font-bold text-primary': newsStore.filterType === 'company' }" @click="handleFilterChange('company')">Empresas</a>
         <a class="tab" :class="{ 'tab-active font-bold text-primary': newsStore.filterType === 'unread' }" @click="handleFilterChange('unread')">No Leídas</a>
         <a class="tab" :class="{ 'tab-active font-bold text-primary': newsStore.filterType === 'read' }" @click="handleFilterChange('read')">Leídas</a>
+
+        <div class="ml-auto pl-2">
+          <button
+            class="btn btn-ghost btn-xs gap-1 text-primary"
+            :title="newsStore.sortOrder === 'desc' ? 'Ordenar: Más antiguas primero' : 'Ordenar: Más recientes primero'"
+            @click="handleSortToggle"
+          >
+            <IconSortDescending v-if="newsStore.sortOrder === 'desc'" class="w-4 h-4" />
+            <IconSortAscending v-else class="w-4 h-4" />
+            {{ newsStore.sortOrder === 'desc' ? 'Recientes' : 'Antiguas' }}
+          </button>
+        </div>
       </div>
 
       <!-- Estado de Carga -->

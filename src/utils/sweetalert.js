@@ -45,14 +45,15 @@ export const showAlert = (options) => {
  */
 export const showToast = (icon = 'success', title = '') => {
   return Swal.fire({
-    ...DEFAULT_OPTIONS,
+    background: DEFAULT_OPTIONS.background,
+    color: DEFAULT_OPTIONS.color,
+    buttonsStyling: false,
     toast: true,
     position: 'top-end',
     showConfirmButton: false,
     timer: 3000,
     timerProgressBar: true,
     width: 'auto',
-    backdrop: false, // CRÍTICO: No overlay para toasts
     customClass: {
       ...BASE_CLASSES,
       popup:

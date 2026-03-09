@@ -42,8 +42,9 @@ export const useNewsStore = defineStore('news', () => {
     localStorage.setItem('moni_news_last_fetched_v3', String(newVal))
   })
 
-  // Opciones de filtro
+  // Opciones de filtro y ordenamiento
   const filterType = ref('all') // 'all', 'market', 'company', 'read', 'unread'
+  const sortOrder = ref('desc') // 'desc' = más recientes, 'asc' = más antiguas
 
   // Cache de comentarios para optimizar lecturas
   // Mapa de newsId -> función de desuscripción (unsubscribe)
@@ -140,6 +141,20 @@ export const useNewsStore = defineStore('news', () => {
       const uniqueNews = Array.from(new Map(combined.map(item => [item.id, item])).values())
       uniqueNews.sort((a, b) => b.datetime - a.datetime)
 
+      // Detección de logos de fuente: si una misma URL de imagen aparece en 2+ noticias,
+      // es el logo del medio (Reuters, Yahoo, etc.) y no una foto real del artículo.
+      const imageCount = {}
+      uniqueNews.forEach(n => {
+        if (n.image) {
+          imageCount[n.image] = (imageCount[n.image] || 0) + 1
+        }
+      })
+      uniqueNews.forEach(n => {
+        if (n.image && imageCount[n.image] >= 2) {
+          n.image = '' // Limpiar logos repetidos para usar placeholder visual
+        }
+      })
+
       // Paginación en memoria: límite configurado a 50 elementos
       newsList.value = uniqueNews.slice(0, 50)
       lastFetched.value = Date.now()
@@ -221,6 +236,13 @@ export const useNewsStore = defineStore('news', () => {
       result = result.filter(n => n.customType === 'company')
     }
 
+    // Ordenamiento por fecha
+    result = [...result].sort((a, b) => {
+      return sortOrder.value === 'desc'
+        ? (b.datetime || 0) - (a.datetime || 0)
+        : (a.datetime || 0) - (b.datetime || 0)
+    })
+
     return result
   })
 
@@ -236,6 +258,7 @@ export const useNewsStore = defineStore('news', () => {
     loading,
     error,
     filterType,
+    sortOrder,
     readHistory,
     newsComments,
     getHistoryList,

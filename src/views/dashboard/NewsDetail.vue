@@ -138,7 +138,11 @@ const toggleTranslation = () => {
 
       <!-- Imagen -->
       <figure class="w-full aspect-video rounded-2xl overflow-hidden shadow-md mb-8 bg-neutral">
-        <img :src="newsItem.image || 'https://placehold.co/1200x600/1d232a/a6adbb?text=Noticias+Financieras'" :alt="newsItem.headline" class="w-full h-full object-cover" />
+        <img v-if="newsItem.image" :src="newsItem.image" :alt="newsItem.headline" class="w-full h-full object-cover" />
+        <div v-else class="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-primary/80 to-base-content/60 text-white/90">
+          <IconArticle class="w-16 h-16 mb-3 opacity-60" />
+          <span class="text-sm font-bold uppercase tracking-widest opacity-80">{{ newsItem.source }}</span>
+        </div>
       </figure>
 
       <!-- Contenido de Resumen -->
