@@ -8,8 +8,8 @@ import { showToast, showConfirm } from '@/utils/sweetalert'
 const props = defineProps({
   newsId: {
     type: [String, Number],
-    required: true
-  }
+    required: true,
+  },
 })
 
 const newsStore = useNewsStore()
@@ -56,7 +56,10 @@ const submitComment = async () => {
     showToast('success', 'Comentario publicado')
   } catch (err) {
     console.error(err)
-    showToast('error', 'Error publicando comentario. (Asegúrate de no usar malas palabras o un texto muy largo)')
+    showToast(
+      'error',
+      'Error publicando comentario. (Asegúrate de no usar malas palabras o un texto muy largo)'
+    )
   } finally {
     isSubmitting.value = false
   }
@@ -85,7 +88,10 @@ const formatDate = (timestamp) => {
   if (!timestamp) return 'Justo ahora'
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
   return new Intl.DateTimeFormat('es-ES', {
-    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(date)
 }
 </script>
@@ -96,10 +102,16 @@ const formatDate = (timestamp) => {
 
     <!-- Formulario de Entrada de Comentarios -->
     <div v-if="authStore.isAuthenticated" class="mb-8 flex gap-4 items-start">
-      <div v-if="authStore.userAvatar" class="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-neutral text-neutral-content flex items-center justify-center">
+      <div
+        v-if="authStore.userAvatar"
+        class="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-neutral text-neutral-content flex items-center justify-center"
+      >
         <img :src="authStore.userAvatar" alt="Avatar" class="w-full h-full object-cover" />
       </div>
-      <div v-else class="w-10 h-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center shrink-0 uppercase font-bold">
+      <div
+        v-else
+        class="w-10 h-10 rounded-full bg-neutral text-neutral-content flex items-center justify-center shrink-0 uppercase font-bold"
+      >
         {{ authStore.userName.charAt(0) }}
       </div>
       <div class="flex-1 flex flex-col gap-2">
@@ -129,23 +141,26 @@ const formatDate = (timestamp) => {
 
     <!-- Colección de Comentarios Renderizados -->
     <div class="space-y-6">
-      <div v-if="!newsStore.newsComments[newsId] || newsStore.newsComments[newsId].length === 0" class="text-center text-base-content/50 py-8">
+      <div
+        v-if="!newsStore.newsComments[newsId] || newsStore.newsComments[newsId].length === 0"
+        class="text-center text-base-content/50 py-8"
+      >
         No hay comentarios aún. ¡Sé el primero en opinar!
       </div>
 
-      <div
-        v-for="comment in newsStore.newsComments[newsId]"
-        :key="comment.id"
-        class="flex gap-4"
-      >
-        <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 uppercase font-bold text-sm">
-          {{ comment.userName.charAt(0) }}
+      <div v-for="comment in newsStore.newsComments[newsId]" :key="comment.id" class="flex gap-4">
+        <div
+          class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 uppercase font-bold text-sm"
+        >
+          {{ comment.userName?.charAt(0) || '?' }}
         </div>
         <div class="flex-1 bg-base-100 p-4 rounded-xl shadow-sm border border-base-200">
           <div class="flex justify-between items-start mb-2">
             <div>
               <span class="font-bold text-sm">{{ comment.userName }}</span>
-              <span class="text-xs text-base-content/50 ml-2">{{ formatDate(comment.createdAt) }}</span>
+              <span class="text-xs text-base-content/50 ml-2">{{
+                formatDate(comment.createdAt)
+              }}</span>
             </div>
 
             <button

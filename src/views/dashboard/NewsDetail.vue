@@ -10,6 +10,7 @@ import { showToast } from '@/utils/sweetalert'
 const route = useRoute()
 const router = useRouter()
 const newsStore = useNewsStore()
+const detailImageFailed = ref(false)
 
 const newsId = computed(() => route.params.id)
 
@@ -138,7 +139,7 @@ const toggleTranslation = () => {
 
       <!-- Imagen -->
       <figure class="w-full aspect-video rounded-2xl overflow-hidden shadow-md mb-8 bg-neutral">
-        <img v-if="newsItem.image" :src="newsItem.image" :alt="newsItem.headline" class="w-full h-full object-cover" />
+        <img v-if="newsItem.image && !detailImageFailed" :src="newsItem.image" :alt="newsItem.headline || ''" class="w-full h-full object-cover" @error="detailImageFailed = true" />
         <div v-else class="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-primary/80 to-base-content/60 text-white/90">
           <IconArticle class="w-16 h-16 mb-3 opacity-60" />
           <span class="text-sm font-bold uppercase tracking-widest opacity-80">{{ newsItem.source }}</span>

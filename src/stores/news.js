@@ -5,7 +5,18 @@ import { db, auth } from '@/services/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 
 // Fixed imports
-import { collection as fsCollection, doc as fsDoc, setDoc as fsSetDoc, getDocs as fsGetDocs, onSnapshot as fsOnSnapshot, query as fsQuery, orderBy as fsOrderBy, addDoc as fsAddDoc, deleteDoc as fsDeleteDoc, serverTimestamp as fsServerTimestamp } from 'firebase/firestore'
+import {
+  collection as fsCollection,
+  doc as fsDoc,
+  setDoc as fsSetDoc,
+  getDocs as fsGetDocs,
+  onSnapshot as fsOnSnapshot,
+  query as fsQuery,
+  orderBy as fsOrderBy,
+  addDoc as fsAddDoc,
+  deleteDoc as fsDeleteDoc,
+  serverTimestamp as fsServerTimestamp,
+} from 'firebase/firestore'
 
 const safeJSONParse = (key, defaultVal) => {
   try {
@@ -30,13 +41,21 @@ export const useNewsStore = defineStore('news', () => {
   const readHistory = ref(new Set(savedHistory))
   const lastFetched = ref(savedLastFetched)
 
-  watch(newsList, (newVal) => {
-    localStorage.setItem('moni_news_list_v3', JSON.stringify(newVal))
-  }, { deep: true })
+  watch(
+    newsList,
+    (newVal) => {
+      localStorage.setItem('moni_news_list_v3', JSON.stringify(newVal))
+    },
+    { deep: true }
+  )
 
-  watch(readHistory, (newVal) => {
-    localStorage.setItem('moni_news_history', JSON.stringify(Array.from(newVal)))
-  }, { deep: true })
+  watch(
+    readHistory,
+    (newVal) => {
+      localStorage.setItem('moni_news_history', JSON.stringify(Array.from(newVal)))
+    },
+    { deep: true }
+  )
 
   watch(lastFetched, (newVal) => {
     localStorage.setItem('moni_news_last_fetched_v3', String(newVal))
@@ -55,10 +74,13 @@ export const useNewsStore = defineStore('news', () => {
   const loadHistory = async () => {
     if (!auth.currentUser) return
     try {
-      const q = fsQuery(fsCollection(db, `users/${auth.currentUser.uid}/newsHistory`), fsOrderBy('viewedAt', 'desc'))
+      const q = fsQuery(
+        fsCollection(db, `users/${auth.currentUser.uid}/newsHistory`),
+        fsOrderBy('viewedAt', 'desc')
+      )
       const snapshot = await fsGetDocs(q)
       const historyIds = new Set(readHistory.value) // Mezclamos las locales con las remotas
-      snapshot.forEach(doc => {
+      snapshot.forEach((doc) => {
         historyIds.add(doc.id)
       })
       readHistory.value = historyIds
@@ -96,7 +118,7 @@ export const useNewsStore = defineStore('news', () => {
         headline: noticiaData.headline || '',
         url: noticiaData.url || '',
         image: noticiaData.image || '',
-        viewedAt: fsServerTimestamp()
+        viewedAt: fsServerTimestamp(),
       })
     } catch (err) {
       console.error('Error guardando historial:', err)
@@ -106,7 +128,12 @@ export const useNewsStore = defineStore('news', () => {
   // Obtención de noticias (API externa)
   const fetchNews = async (force = false) => {
     // Límite de tasa de llamadas: 5 minutos, a menos que se fuerce la actualización
-    if (!force && lastFetched.value && (Date.now() - lastFetched.value < 5 * 60 * 1000) && newsList.value.length > 0) {
+    if (
+      !force &&
+      lastFetched.value &&
+      Date.now() - lastFetched.value < 5 * 60 * 1000 &&
+      newsList.value.length > 0
+    ) {
       return
     }
 
@@ -117,7 +144,11 @@ export const useNewsStore = defineStore('news', () => {
       const marketNews = await newsApi.getMarketNews('general')
 
       // Integración de noticias empresariales (ej. AAPL) para complementar el flujo general
-      const companyNews = await newsApi.getCompanyNews('AAPL', new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0], new Date().toISOString().split('T')[0])
+      const companyNews = await newsApi.getCompanyNews(
+        'AAPL',
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        new Date().toISOString().split('T')[0]
+      )
 
       // Sanitización de HTML (decodificación de entidades y eliminación de etiquetas)
       const stripHtml = (html) => {
@@ -133,23 +164,27 @@ export const useNewsStore = defineStore('news', () => {
       }
 
       // Etiquetado de categoría base e inyección de resúmenes sanitizados
-      const formattedMarket = marketNews.map(n => ({...n, customType: 'market', summary: stripHtml(n.summary)}))
-      const formattedCompany = companyNews.map(n => ({...n, customType: 'company', summary: stripHtml(n.summary)}))
+      const formattedMarket = marketNews
+        .filter((n) => n && n.headline)
+        .map((n) => ({ ...n, customType: 'market', summary: stripHtml(n?.summary) }))
+      const formattedCompany = companyNews
+        .filter((n) => n && n.headline)
+        .map((n) => ({ ...n, customType: 'company', summary: stripHtml(n?.summary) }))
 
       // Fusión de colecciones, eliminación de duplicados por ID, y ordenamiento cronológico descendente
       const combined = [...formattedMarket, ...formattedCompany]
-      const uniqueNews = Array.from(new Map(combined.map(item => [item.id, item])).values())
+      const uniqueNews = Array.from(new Map(combined.map((item) => [item.id, item])).values())
       uniqueNews.sort((a, b) => b.datetime - a.datetime)
 
       // Detección de logos de fuente: si una misma URL de imagen aparece en 2+ noticias,
       // es el logo del medio (Reuters, Yahoo, etc.) y no una foto real del artículo.
       const imageCount = {}
-      uniqueNews.forEach(n => {
+      uniqueNews.forEach((n) => {
         if (n.image) {
           imageCount[n.image] = (imageCount[n.image] || 0) + 1
         }
       })
-      uniqueNews.forEach(n => {
+      uniqueNews.forEach((n) => {
         if (n.image && imageCount[n.image] >= 2) {
           n.image = '' // Limpiar logos repetidos para usar placeholder visual
         }
@@ -176,15 +211,19 @@ export const useNewsStore = defineStore('news', () => {
     if (commentListeners.value.has(String(newsId))) return // Evitar duplicidad de listeners
 
     const q = fsQuery(fsCollection(db, `news/${newsId}/comments`), fsOrderBy('createdAt', 'desc'))
-    const unsubscribe = fsOnSnapshot(q, (snapshot) => {
-      const comments = []
-      snapshot.forEach(doc => {
-        comments.push({ id: doc.id, ...doc.data() })
-      })
-      newsComments.value = { ...newsComments.value, [String(newsId)]: comments }
-    }, (error) => {
-      console.error("Error validando comentarios (Firebase Rules):", error)
-    })
+    const unsubscribe = fsOnSnapshot(
+      q,
+      (snapshot) => {
+        const comments = []
+        snapshot.forEach((doc) => {
+          comments.push({ id: doc.id, ...doc.data() })
+        })
+        newsComments.value = { ...newsComments.value, [String(newsId)]: comments }
+      },
+      (error) => {
+        console.error('Error validando comentarios (Firebase Rules):', error)
+      }
+    )
 
     commentListeners.value.set(String(newsId), unsubscribe)
   }
@@ -205,7 +244,7 @@ export const useNewsStore = defineStore('news', () => {
         userId: auth.currentUser.uid,
         userName: userName,
         text: text.trim(),
-        createdAt: fsServerTimestamp()
+        createdAt: fsServerTimestamp(),
       })
     } catch (err) {
       console.error('Error añadiendo comentario:', err)
@@ -227,13 +266,13 @@ export const useNewsStore = defineStore('news', () => {
     let result = newsList.value
 
     if (filterType.value === 'read') {
-      result = result.filter(n => readHistory.value.has(String(n.id)))
+      result = result.filter((n) => readHistory.value.has(String(n.id)))
     } else if (filterType.value === 'unread') {
-      result = result.filter(n => !readHistory.value.has(String(n.id)))
+      result = result.filter((n) => !readHistory.value.has(String(n.id)))
     } else if (filterType.value === 'market') {
-      result = result.filter(n => n.customType === 'market')
+      result = result.filter((n) => n.customType === 'market')
     } else if (filterType.value === 'company') {
-      result = result.filter(n => n.customType === 'company')
+      result = result.filter((n) => n.customType === 'company')
     }
 
     // Ordenamiento por fecha
@@ -249,7 +288,10 @@ export const useNewsStore = defineStore('news', () => {
   // Derivación de historial de visualización
   const getHistoryList = computed(() => {
     // Mapeo e inversión de array temporal (últimos elementos primero)
-    return Array.from(readHistory.value).reverse().map(id => newsList.value.find(n => String(n.id) === id)).filter(Boolean)
+    return Array.from(readHistory.value)
+      .reverse()
+      .map((id) => newsList.value.find((n) => String(n.id) === id))
+      .filter(Boolean)
   })
 
   return {
@@ -268,6 +310,6 @@ export const useNewsStore = defineStore('news', () => {
     subscribeToComments,
     unsubscribeFromComments,
     addComment,
-    deleteComment
+    deleteComment,
   }
 })

@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, reactive } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+
+let rafId = null
 import {
   IconCoinBitcoin,
   IconCurrencyEthereum,
@@ -90,35 +92,39 @@ const floatingItems = reactive([
 ])
 
 const handleMouseMove = (e) => {
-  if (!heroRef.value) return
-  const { clientX, clientY } = e
-  const rect = heroRef.value.getBoundingClientRect()
+  if (rafId) return
+  rafId = window.requestAnimationFrame(() => {
+    rafId = null
+    if (!heroRef.value) return
+    const { clientX, clientY } = e
+    const rect = heroRef.value.getBoundingClientRect()
 
-  const mx = clientX - rect.left
-  const my = clientY - rect.top
+    const mx = clientX - rect.left
+    const my = clientY - rect.top
 
-  mouse.x = mx
-  mouse.y = my
+    mouse.x = mx
+    mouse.y = my
 
-  floatingItems.forEach((item) => {
-    const baseX = rect.width / 2 + (item.x * rect.width) / 100
-    const baseY = rect.height / 2 + (item.y * rect.height) / 100
+    floatingItems.forEach((item) => {
+      const baseX = rect.width / 2 + (item.x * rect.width) / 100
+      const baseY = rect.height / 2 + (item.y * rect.height) / 100
 
-    const dx = mx - baseX
-    const dy = my - baseY
-    const dist = Math.sqrt(dx * dx + dy * dy)
+      const dx = mx - baseX
+      const dy = my - baseY
+      const dist = Math.sqrt(dx * dx + dy * dy)
 
-    const radius = 300 // Radio un poco más amplio
-    if (dist < radius) {
-      const force = (radius - dist) / radius
-      const push = force * 35 // Empuje más sutil (antes 60)
+      const radius = 300 // Radio un poco más amplio
+      if (dist < radius) {
+        const force = (radius - dist) / radius
+        const push = force * 35 // Empuje más sutil (antes 60)
 
-      item.offsetX = -(dx / dist) * push
-      item.offsetY = -(dy / dist) * push
-    } else {
-      item.offsetX *= 0.94 // Retorno más suave
-      item.offsetY *= 0.94
-    }
+        item.offsetX = -(dx / dist) * push
+        item.offsetY = -(dy / dist) * push
+      } else {
+        item.offsetX *= 0.94 // Retorno más suave
+        item.offsetY *= 0.94
+      }
+    })
   })
 }
 
@@ -128,6 +134,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMove)
+  if (rafId) window.cancelAnimationFrame(rafId)
 })
 </script>
 

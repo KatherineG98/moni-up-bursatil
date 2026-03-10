@@ -161,7 +161,7 @@ onMounted(() => {
             @click="openHistoryNews({ newsId: item.id, url: item.url })"
           >
             <div class="w-12 h-12 rounded overflow-hidden shrink-0 bg-neutral">
-              <img :src="item.image || 'https://placehold.co/60x60/1d232a/a6adbb?text=...'" class="w-full h-full object-cover">
+              <img :src="item.image || 'https://placehold.co/60x60/1d232a/a6adbb?text=...'" class="w-full h-full object-cover" @error="(e) => e.target.src = 'https://placehold.co/60x60/1d232a/a6adbb?text=...'">
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold line-clamp-2 leading-tight group-hover:text-primary transition-colors">

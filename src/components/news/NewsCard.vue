@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { IconClock, IconNews } from '@tabler/icons-vue'
 
 const props = defineProps({
@@ -25,7 +25,8 @@ const formattedDate = computed(() => {
   }).format(date)
 })
 
-const hasImage = computed(() => !!props.news.image)
+const imageFailed = ref(false)
+const hasImage = computed(() => !!props.news.image && !imageFailed.value)
 const badgeText = computed(() => props.isRead ? 'Leída' : 'Nueva')
 const badgeClass = computed(() => props.isRead ? 'badge-neutral' : 'badge-primary')
 
@@ -47,12 +48,12 @@ const placeholderGradient = computed(() => {
   <div class="card bg-base-100 shadow-sm hover:shadow-md transition-shadow h-full border border-base-300 overflow-hidden cursor-pointer">
     <figure class="h-48 relative overflow-hidden">
       <!-- Imagen real del artículo -->
-      <img v-if="hasImage" :src="news.image" :alt="news.headline" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+      <img v-if="hasImage" :src="news.image" :alt="news.headline || ''" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" @error="imageFailed = true" />
 
       <!-- Placeholder estilizado cuando no hay imagen -->
       <div v-else :class="['w-full h-full flex flex-col items-center justify-center bg-linear-to-br text-white/90', placeholderGradient]">
         <IconNews class="w-10 h-10 mb-2 opacity-60" />
-        <span class="text-xs font-bold uppercase tracking-widest opacity-80">{{ news.source }}</span>
+        <span class="text-xs font-bold uppercase tracking-widest opacity-80">{{ news.source || 'Fuente' }}</span>
       </div>
 
       <div class="absolute top-2 right-2 flex gap-2">
@@ -63,9 +64,9 @@ const placeholderGradient = computed(() => {
     </figure>
     <div class="card-body p-4 gap-2 flex flex-col justify-between">
       <div>
-        <p class="text-xs text-base-content/60 font-semibold mb-1 uppercase tracking-wider">{{ news.source }}</p>
-        <h3 class="card-title text-base leading-tight line-clamp-3 mb-2" :title="news.headline">
-          {{ news.headline }}
+        <p class="text-xs text-base-content/60 font-semibold mb-1 uppercase tracking-wider">{{ news.source || 'Fuente' }}</p>
+        <h3 class="card-title text-base leading-tight line-clamp-3 mb-2" :title="news.headline || ''">
+          {{ news.headline || 'Sin título' }}
         </h3>
         <p v-if="news.summary" class="text-sm text-base-content/70 line-clamp-2 mt-2 leading-snug">
           {{ news.summary }}

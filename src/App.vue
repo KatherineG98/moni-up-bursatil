@@ -39,7 +39,7 @@ onMounted(() => {
     <!-- Navegación -->
     <!-- El Header es visible solo en páginas públicas y desaparece en el Dashboard -->
     <header
-      v-if="!route.path.startsWith('/dashboard')"
+      v-show="!route.path.startsWith('/dashboard')"
       class="sticky top-0 z-50 bg-base-100/95 backdrop-blur-md border-b border-base-200"
     >
       <nav class="navbar max-w-[1200px] mx-auto px-4 min-h-16">
@@ -119,7 +119,7 @@ onMounted(() => {
 
     <!-- Pie de Página simplificado -->
     <footer
-      v-if="!route.path.startsWith('/dashboard')"
+      v-show="!route.path.startsWith('/dashboard')"
       class="footer footer-center p-10 bg-base-200 text-base-content rounded mt-auto"
     >
       <aside>
